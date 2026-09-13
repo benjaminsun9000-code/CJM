@@ -13,4 +13,3 @@ Project structure:
 -- Finding the dorminant eigen value and associated eigen vectors of a matrix if posssible
 -- Given a linear transformation T, find its restricted transformation in a subspace defined by an input matrix columns
 -- Recursively find CJM based on Fillipov's proof 
-
