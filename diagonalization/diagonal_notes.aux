@@ -1,0 +1,116 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta}
+
+\geometry{a4paper, margin=1in}
+
+\title{Diagonalizing $A = S\Lambda S^{-1}$ via deflation}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem Statement}
+Given a linear transformation matrix $A$. We want to know:
+\begin{itemize}
+    \item Is $A$ diagonalizable as $S\Lambda S^{-1}$?
+    \item If so, how to find $S$ matrix and $\Lambda$ matrix which contain only eigenvalues on the diagonal?
+\end{itemize}
+
+\section{Core idea of deflation}
+Assuming $A$ is diagonalizable, we can't just find all the eigenvalues directly, and find the eigenbasis of each eigenvalue and assemble these bases to $S$. The assembled $S$ is still invertible as all these bases are linearly independent. The problem lies in how to find all the eigenvalues.
+
+Say we try to solve $\det(A - \lambda I) = 0$ as a polynomial of $\lambda$. The problem is that when the polynomial is above 5th degree, it was proven not solvable.
+
+That is why we need to use power iteration method and deflation to keep finding all the eigenvalues one by one.
+
+The core idea of deflation is simple, just like SVD decomposition, we can view $A$ as sums of outer products of eigen:
+\[
+A = \sum_{i=1}^{k} \lambda_i S_i Q_i^T
+\]
+Here, $S_i$ is the matrix as $\lambda_i$ eigenspace basis. $Q_i^T$ can be deemed as $S_i^+$. Thus $Q_i^T S_i = I_{p_i \times p_i}$. Here $p_i$ is the dim of $E_{\lambda_i}$.
+
+Once we use power iteration method to find dominant $\lambda_1$, we can use RREF to find basis of $(A - \lambda_1 I)$ null space. The basis is $S_1$.
+
+We can use left inverse of $S_1$, aka $S_1^+$, aka $(S_1^T S_1)^{-1} S_1^T$ as $Q_1^T$. Then we calculate:
+\[
+A_{\text{deflated}} = A - \lambda_1 S_1 Q_1^T
+\]
+With $A_{\text{deflated}}$, we can keep going to find and subtract next outer product.
+
+Note, here, for each $\lambda_i$, we find the $S_i$. If we assemble $S = (S_1 \dots S_k)$, the columns of $S$ are linearly independent. The idea is simple, because we can view the input space $\mathbb{R}^n$ as:
+\[
+\mathbb{R}^n = E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}
+\]
+The $k$ eigenspaces are kind of like linearly independent vectors in the sense any vector $\vec{v}$ in $\mathbb{R}^n$ has only one unique decomposition in these $k$ eigenspaces. Since inside the eigenspace $E_{\lambda_i}$, $S_i$ matrix also contains basis as its columns. It is easy to imagine two steps process to prove $S$ columns are linearly independent.
+
+By now we have $S$ and $\Lambda$. However, one thing to note is that the $Q_i^T$ can't be assembled as $Q^T = (Q_1^T \ Q_2^T \ \dots \ Q_k^T)^T$. $Q^T S \neq I$ in general. This is because we are using orthogonal left inverse to find $Q_i^T$. More on this later as we will dig into oblique projection, dual Gram-Schmidt process later. For now, we can just calculate the $Q^T$ as $S^{-1}$ using RREF.
+
+\section{Core idea of testing if $A$ is diagonalizable}
+If $A$ is diagonalizable depends on if each eigenspace's geometrical dimension is the same as the eigenvalue's algebraic multiplicity.
+
+But how do we know once we get eigenvalue from power method?
+
+Let us look at the more general Canonical Jordan decomposition of a linear transformation $A$. Our diagonalizable matrix is just a special form of CJM. From CJM point of view, the input $\mathbb{R}^n$ is direct sum of extended eigenspace:
+\[
+\mathbb{R}^n = T_1 \oplus T_2 \oplus \dots \oplus T_k
+\]
+$T_i$ here is extended eigenspace.
+
+So what is extended eigenspace $T_\lambda$? The following graph illustrates well:
+
+% --- ENHANCED & LARGER TIKZ DIAGRAM ---
+\vspace{0.5cm}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[
+        ellipse node/.style={draw, ellipse, thick},
+        layer1/.style={ellipse node, draw=blue!80!black, fill=blue!8, minimum width=3.8cm, minimum height=2.2cm},
+        layer2/.style={ellipse node, draw=blue!60!black, fill=blue!3, minimum width=6.8cm, minimum height=4.2cm},
+        layerM/.style={ellipse node, draw=black, minimum width=9.8cm, minimum height=6.2cm}
+    ]
+    
+    % Outermost ellipse ker(A - \lambda I)^m
+    \node (kerM) [layerM] {};
+    
+    % Middle ellipse ker(A - \lambda I)^2
+    \node (ker2) [layer2] {};
+    
+    % Innermost ellipse ker(A - \lambda I)
+    \node (ker1) [layer1] {\large $\ker(A - \lambda I)$};
+    
+    % Text Labels in gaps
+    \node [font=\large] at (0, 1.55) {$\ker(A - \lambda I)^2$};
+    \node [font=\Large] at (0, 2.30) {$\vdots$};
+    \node [font=\large] at (0, 2.75) {$\ker(A - \lambda I)^m$};
+
+    % Arrow and Multiplicity Label on the Right
+    \draw [-{Stealth[scale=1.2]}, line width=1.2pt, color=red!70!black] 
+        (kerM.east) -- ++(1.8cm, 0) 
+        node[right, align=left, font=\large] {$\dim$ is $\lambda$'s\\[3pt]algebraic multiplicity};
+    
+    \end{tikzpicture}
+    \caption*{Nested Extended Eigenspaces (The multi-layer onion)}
+\end{figure}
+\vspace{0.5cm}
+
+Obviously:
+\[
+\ker(A - \lambda I) \subseteq \ker(A - \lambda I)^2 \subseteq \dots \subseteq \ker(A - \lambda I)^m = \ker(A - \lambda I)^{m+1}
+\]
+It is like a multi-layer onion. The innermost layer is $\ker(A - \lambda I)$ aka $E_\lambda$.
+
+If we keep expanding, at one point $\ker(A - \lambda I)^m = \ker(A - \lambda I)^{m+1}$. Because the dim of $A$ is limited, it must stop somewhere.
+
+For diagonalizable $A$, all the extended eigenspace $T$ is the same as $E_\lambda$. Put it another way:
+\[
+\ker(A - \lambda I) = \ker(A - \lambda I)^2
+\]
+This is the test we are looking for.
+
+\end{document}
