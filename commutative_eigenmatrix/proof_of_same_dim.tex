@@ -1,0 +1,95 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+
+\title{Finding a Shared Eigenmatrix for 2 Commuting and Diagonalizable Matrices}
+\author{}
+\date{}
+\maketitle
+
+\section{Problem Statement}
+When studying Chapter 5, Theorem 5F of Gilbert Strang's \textit{Linear Algebra and Its Applications}, the author states that two diagonalizable matrices share the exact same eigenvector matrix $S$ if and only if they commute ($AB = BA$). Strang beautifully illustrates the case where all of $A$'s eigenvalues are distinct (meaning each eigenspace has a geometric multiplicity of 1). In that scenario, $A$'s eigenvector matrix $S$ automatically works for $B$.
+
+The reasoning for the distinct eigenvalue case is simple:
+\begin{enumerate}
+    \item \textbf{Invariance:} Due to the commuting condition $AB = BA$, the eigenspaces of $A$ are invariant under the linear transformation of $B$.
+    \item \textbf{One-Dimensional Directions:} When eigenvalues are distinct, each eigenspace of $A$ is a one-dimensional line. Because of invariance, applying $B$ to a vector on this line must keep the output vector on the exact same line, making it an automatic eigenvector for $B$.
+\end{enumerate}
+
+However, this raises a deeper question: Why does this theorem still hold when $A$ has repeated eigenvalues? Why does Strang guarantee it works when eigenspaces have a dimension greater than 1? Moreover, how do we algorithmically construct this shared eigenvector matrix $S$ as a computer program?
+
+\section{First Try Solution}
+An initial observation is that if we diagonalize $A$ as $A = S \Lambda_A S^{-1}$, the columns of $S$ corresponding to a specific eigenvalue $\lambda$ can be formed by any valid basis of the eigenspace $E_\lambda = \text{ker}(A - \lambda I)$. However, when we want to satisfy $B = S \Lambda_B S^{-1}$ simultaneously, those basis vectors cannot be chosen arbitrarily; they must also be eigenvectors of $B$.
+
+This naturally leads to an algorithmic strategy: We restrict the global operator $B$ to a local operator acting only within $A$'s eigenspace, which we call $\hat{B}: E_\lambda \to E_\lambda$. We then find the eigenvectors of $\hat{B}$ inside the domain $\text{ker}(A - \lambda I)$. I have already implemented the programmatic approach on my GitHub repository under the project \texttt{CJM} in the folder \texttt{commutative\_eigenmatrix}.
+
+Yet a million dollar question remains: Are we guaranteed to find enough eigenvectors this way? We know that $\mathbb{R}^n$ can be decomposed into a direct sum of $A$'s eigenspaces:
+\[ \mathbb{R}^n = E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k} \]
+
+If each restricted operator $\hat{B}$ possesses a number of linearly independent eigenvectors exactly equal to $\text{dim}(E_{\lambda_i})$, we can happily assemble them block-by-block to form our shared matrix $S$. When I ran my program, it successfully found a full set of eigenvectors every time. However, curiosity mandates a formal proof. In general, the $n$ independent eigenvectors of a diagonalizable matrix $B$ are not forced to align with a pre-existing decomposition. One could imagine an eigenvector of $B$ spilling across multiple eigenspaces of $A$, spanning components in both $E_{\lambda_1}$ and $E_{\lambda_2}$. To establish that the eigenvectors of $B$ strictly divide themselves to match the dimensions of $A$'s eigenspaces, we must analyze the underlying algebraic structure. 
+
+The later sections are based on my exploration with AI about mathematically why it must be true. This exploration also helps me to understand eigen decomposition and Jordan decompostion much deeper.
+
+\section{Proof of $\hat{B}$ Eigenvectors Count Aligns with $\text{dim}(E_\lambda)$}
+
+\begin{theorem}
+If two matrices $A$ and $B$ commute ($AB = BA$) and are both diagonalizable, and $\hat{B}$ is the restriction of $B$ onto the eigenspace $E_\lambda$ of $A$, then the number of linearly independent eigenvectors of $\hat{B}$ is exactly equal to $\text{dim}(E_\lambda)$.
+\end{theorem}
+
+To prove this, we use the algebraic properties of the characteristic polynomial, the minimal polynomial, and the Cayley-Hamilton Theorem.
+
+\subsection{The Characteristic vs. Minimal Polynomial}
+The characteristic polynomial $p(x) = \text{det}(B - xI) = 0$ is used to find eigenvalues. By the Cayley-Hamilton theorem, every matrix satisfies its own characteristic polynomial, meaning $p(B) = [0]_{n \times n}$. Since at least one polynomial eliminates $B$, there must exist a unique lowest degree monic polynomial that does so, which we call the minimal polynomial, denoted $M_B(x)$. By definition, $M_B(B) = [0]_{n \times n}$.
+
+By the way, I will write another section about how to view Cayley-Hamilton kind of therom, aka polynomial wiping out matrix intuitive using Jordan Form, based on my exploration with AI. Moreover, how to intuitively look at Jordan Form from extened eigen space point of view. 
+
+\subsection{Diagonalizability and Root Powers}
+A theorem in linear algebra states that a matrix is diagonalizable if and only if its minimal polynomial has distinct roots. This means that when $M_B(x)$ is factored into linear terms, every single power is exactly 1:
+\[ M_B(x) = (x - \mu_1)(x - \mu_2)\dots(x - \mu_m) \]
+
+If a matrix has a Jordan block of size greater than 1 (an extended eigenspace structure), it is non-diagonalizable, and its minimal polynomial is forced to have a power of 2 or higher to fully wipe out the superdiagonal entries. Because $B$ is diagonalizable, $M_B(x)$ strictly contains only power-1 terms.
+
+For now, we accepted this theorem. In fact, this seemingly arcane theorem will be very intuitive under the lens of the above polynomial wiping out matrix with regard to deeper understanding of Jordan decomposition. 
+
+\subsection{The Core Proof Strategy}
+To prove that the restricted operator $\hat{B}$ gives enough eigenvectors to span the subspace, we must show that $\hat{B}$ is a diagonalizable operator on $E_\lambda$. An operator is diagonalizable if and only if its local minimal polynomial $M_{\hat{B}}(x)$ consists entirely of power-1 terms.
+
+If we can prove that the minimal polynomial annihilates the restricted matrix—meaning $M_B(\hat{B}) = [0]_{k_1 \times k_1}$ (where $k_1 = \text{dim}(E_\lambda)$)—then the local polynomial $M_{\hat{B}}(x)$ must cleanly divide $M_B(x)$. ($M_{\hat{B}}(x)$ is mininmal, meaning $M_B(x)$ is a multiple.) Since $M_B(x)$ has no repeated roots, its divisor $M_{\hat{B}}(x)$ will be forced to have only power-1 terms, proving $\hat{B}$ is diagonalizable using this theorem again.
+
+\subsection{Proof that $M_B(\hat{B}) = [0]_{k_1 \times k_1}$}
+Let $k_1 = \text{dim}(E_\lambda)$ represent the geometric multiplicity of $A$'s eigenvalue $\lambda$. The restricted operator $\hat{B}$ maps $E_\lambda \to E_\lambda$ and can be represented locally as a $k_1 \times k_1$ matrix.
+
+We can write the minimal polynomial of $B$ as:
+\[ M_B(x) = c_n x^n + c_{n-1} x^{n-1} + \dots + c_0 \]
+
+We evaluate this polynomial on the restricted matrix $\hat{B}$:
+\[ M_B(\hat{B}) = c_n \hat{B}^n + c_{n-1} \hat{B}^{n-1} + \dots + c_0 I_{k_1 \times k_1} \]
+
+To show this matrix equals the $k_1 \times k_1$ zero matrix, we test its effect on an arbitrary abstract vector $w \in E_\lambda$:
+\[ M_B(\hat{B})w = c_n \hat{B}^n w + c_{n-1} \hat{B}^{n-1} w + \dots + c_0 w \]
+
+Because $w$ lives inside the eigenspace $E_\lambda$, we know that $\hat{B}w = Bw$ by the definition of an operator restriction. Or on simple terms, $B$ transform and $\hat{B}$ are the same operator in this eigen space. It is just that $B$ domain is wider. Furthermore, because $E_\lambda$ is an invariant subspace under $B$, the vector $\hat{B}w$ lands back inside $E_\lambda$. This allows us to apply the restriction sequentially. By induction, it is certain that:
+\[ \hat{B}^k w = B^k w \quad \text{for any power } k \]
+
+$E_\lambda$ is invariant under $\hat{B}$ is also kind of simple to understand. This basically means any vector $v$ in this $A$ eigen space upon $B$ mapping still stays in this eigen space. Since $v$ is in this eigen space, it has $Av = \lambda v$. We want to show $A(Bv) = \lambda (Bv)$. Since AB = BA. This obviously true.     
+
+Substituting this property into our polynomial equation gives:
+\[ M_B(\hat{B})w = c_n B^n w + c_{n-1} B^{n-1} w + \dots + c_0 w = M_B(B)w \]
+
+Since $M_B(B)$ is the zero matrix $[0]_{n \times n}$, it annihilates every vector in $\mathbb{R}^n$, meaning $M_B(B)w = 0$. Consequently:
+\[ M_B(\hat{B})w = 0 \quad \text{for all } w \in E_\lambda \]
+
+Because it evaluates to zero for every single vector in the subspace, the operator $M_B(\hat{B})$ is identically the $[0]_{k_1 \times k_1}$ zero matrix.
+
+\subsection{Conclusion}
+Since $M_B(\hat{B}) = [0]_{k_1 \times k_1}$, the minimal polynomial $M_{\hat{B}}(x)$ must divide $M_B(x)$. Because the polynomial $M_B(x)$ is composed entirely of distinct linear factors with powers of 1, $M_{\hat{B}}(x)$ is prevented from having any repeated roots.
+
+Thus, the restricted operator $\hat{B}$ is fully diagonalizable on $E_\lambda$, meaning it features a complete set of $k_1$ linearly independent eigenvectors, using this diagonalizable equals minimal polynomial largest term power as 1 therom again. When we run our program to find these vectors, we are guaranteed to find exactly enough to fill the dimension of $A$'s eigenspace. \qed
+
+\end{document}
+
