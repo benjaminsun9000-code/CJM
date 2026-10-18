@@ -1,0 +1,11 @@
+the first try of defalation use the algebraic structure
+and update linear transform with one E lambdai's left inverse, 
+which is perpendicular to E lambdai. This does not work actually.
+
+The core geometric idea is that linear tranform effect
+to a vector is just the same as linear transform effect to
+the vector's oblique projection to all the eigen spaces of this
+linear transform. The oblique projection can be reached by
+applying an outter product of two matrix if we choose the
+right basis of A-lambdai null space and left null space
+basis. The choice is called dual gram-schmit process. 

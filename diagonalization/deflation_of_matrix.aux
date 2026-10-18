@@ -1,0 +1,307 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm, bm}
+\usepackage{tikz}
+
+\title{\textbf{Deflation of a Matrix}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section{The Eigenspace Decomposition and Basis Subspace View}
+
+Let $A$ be a diagonalizable linear transformation matrix. Because $A$ is diagonalizable, we can write the entire $\mathbb{R}^n$ space as a direct sum of its independent eigenspaces:
+\[
+\mathbb{R}^n = E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}
+\]
+This means the action of the matrix can be viewed as $A$ restricted to each eigenspace $E_{\lambda_i}$, applied to a vector $\vec{v}$, and we sum those individual components up.
+
+To see how this connects to matrix representations and coordinates, any arbitrary vector $\vec{v} \in \mathbb{R}^n$ can be written as a unique linear combination of a general tracking basis $B = [\vec{b}_1, \vec{b}_2, \dots, \vec{b}_n]$:
+\[
+\vec{v} = x_1 \vec{b}_1 + x_2 \vec{b}_2 + \dots + x_n \vec{b}_n
+\]
+Because this is a unique linear combination, when we apply the linear transformation matrix $A$, we can distribute it across the elements:
+\[
+A\vec{v} = x_1(A\vec{b}_1) + x_2(A\vec{b}_2) + \dots + x_n(A\vec{b}_n)
+\]
+
+If we choose our basis vectors exclusively from the eigenspaces, we can group these individual basis tracking items into coordinate pieces that belong to each specific eigenspace block. This allows us to break the total vector $\vec{v}$ down into localized component vectors $\vec{d}_i$, where each $\vec{d}_i$ represents the unique \textbf{oblique projection} of our $\mathbb{R}^n$ vector onto that specific target eigenspace:
+\[
+\vec{d}_1 = \text{OP}_{E_{\lambda_1}}(\vec{v}), \quad \vec{d}_2 = \text{OP}_{E_{\lambda_2}}(\vec{v}), \quad \dots, \quad \vec{d}_k = \text{OP}_{E_{\lambda_k}}(\vec{v})
+\]
+This allows us to rewrite our total vector $\vec{v}$ as a direct sum of its eigenspace projection components:
+\[
+\vec{v} = \vec{d}_1 + \vec{d}_2 + \dots + \vec{d}_k
+\]
+
+When we apply the linear transformation matrix $A$ to this setup, a powerful simplification occurs. Because each component $\vec{d}_i$ lives entirely within the invariant eigenspace $E_{\lambda_i}$, the forward action of $A$ on $\vec{d}_i$ becomes a simple scalar scaling operation ($A\vec{d}_i = \lambda_i \vec{d}_i$):
+\[
+A\vec{v} = \lambda_1 \vec{d}_1 + \lambda_2 \vec{d}_2 + \dots + \lambda_k \vec{d}_k
+\]
+
+Substituting our oblique projection operators back into this distributed sum yields:
+\[
+A\vec{v} = \lambda_1 \text{OP}_{E_{\lambda_1}}(\vec{v}) + \lambda_2 \text{OP}_{E_{\lambda_2}}(\vec{v}) + \dots + \lambda_k \text{OP}_{E_{\lambda_k}}(\vec{v})
+\]
+All in all, the entire matrix action can be compressed into a clean, uncoupled summation of independent eigenspace channels:
+\[
+A\vec{v} = \sum_{i=1}^k \lambda_i \text{OP}_{E_{\lambda_i}}(\vec{v})
+\]
+This framework demonstrates that if we can isolate and pull out just one of these projection operators, we can systematically deflate the matrix channel by channel.
+
+---
+
+\section{The Geometry of Oblique Projections}
+
+Because of the direct sum structure $\mathbb{R}^n = E_{\lambda_1} \oplus \dots \oplus E_{\lambda_k}$, any arbitrary vector $\vec{b} \in \mathbb{R}^n$ can be uniquely broken down into a sum of constituent vectors, where each piece lives purely inside its own corresponding eigenspace:
+\[
+\vec{b} = \vec{v}_1 + \vec{v}_2 + \dots + \vec{v}_k \quad (\text{where } \vec{v}_i \in E_{\lambda_i})
+\]
+
+We \textbf{cannot use the standard orthogonal projection matrix} to isolate these individual eigenspace component vectors $(\vec{v}_1, \dots, \vec{v}_k)$ because the underlying eigenspaces are not orthogonal to one another. If we projected orthogonally, our landing spot would be contaminated by pieces of the other eigenspaces.
+
+Our goal is to find the exact projection of an $\mathbb{R}^n$ vector onto the target eigenspace matrix $E_{\lambda_1}$ to extract its true native component $\vec{v}_1$. To isolate this true component, we must use an \textbf{oblique projection}, which strips away the remaining components by casting the projection along a direction parallel to the remaining eigenspaces.
+
+\subsection{The 2D Baseline Concept}
+Consider two non-orthogonal but linearly independent vectors: the top direction vector is called $\vec{u}$, the bottom direction vector is called $\vec{v}$, and there is a target vector $\vec{b}$ running up between them from the origin. We want to find the true component of $\vec{b}$ along the span of $\vec{v}$ by dropping a line from the tip of vector $\vec{b}$ down onto the subspace spanned by $\vec{v}$, traveling perfectly parallel to vector $\vec{u}$.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+    % Coordinates
+    \coordinate (O) at (0,0);
+    \coordinate (U) at (1.5,2.5);
+    \coordinate (V) at (4,0);
+    \coordinate (B) at (2.5,1.8);
+    \coordinate (Proj) at (1.42,0);
+    
+    % Axes/Vectors lines
+    \draw[->, thick] (O) -- (U) node[above] {$\vec{u}$};
+    \draw[->, thick] (O) -- (V) node[right] {$\vec{v}$};
+    \draw[->, ultra thick, blue] (O) -- (B) node[above right, black] {$\vec{b}$ (Vector from origin)};
+    
+    % Parallel projection line
+    \draw[dashed, red, thick] (B) -- (1.42, 0);
+    \filldraw (1.42,0) circle (1.5pt) node[below] {$E_1\hat{x}$ (Projection Point)};
+    
+    % Annotations
+    \node[anchor=west] at (2.1,0.9) [red] {\small (This error segment $\vec{b} - E_1\hat{x}$ is perfectly PARALLEL to Vector $\vec{u}$)};
+    \node[below left] at (O) {$0$};
+\end{tikzpicture}
+\end{center}
+
+To derive this projection matrix, we construct a vector $\vec{u}^\perp$ that is strictly perpendicular to vector $\vec{u}$. The error vector running from the projection point $E_1 \hat{x}$ to the tip of vector $\vec{b}$ is parallel to $\vec{u}$. Therefore, it must be completely orthogonal to $\vec{u}^\perp$:
+\[
+(\vec{u}^\perp)^T (\vec{b} - E_1 \hat{x}) = 0
+\]
+Expanding this product gives:
+\[
+(\vec{u}^\perp)^T \vec{b} - (\vec{u}^\perp)^T E_1 \hat{x} = 0 \implies (\vec{u}^\perp)^T E_1 \hat{x} = (\vec{u}^\perp)^T \vec{b}
+\]
+Isolating the coordinate scale factor $\hat{x}$:
+\[
+\hat{x} = \left((\vec{u}^\perp)^T E_1\right)^{-1} (\vec{u}^\perp)^T \vec{b}
+\]
+Since the final projected point is $E_1 \hat{x}$, the full oblique projection matrix $P$ is:
+\[
+P = E_1 \left((\vec{u}^\perp)^T E_1\right)^{-1} (\vec{u}^\perp)^T
+\]
+
+\subsection{Generalizing to the Eigenspace $E_{\lambda_1}$}
+Now we lift this exact geometric behavior into a generalized coordinate view for the eigenspace $E_{\lambda_1}$. Instead of a single vector $\vec{u}$, we replace the upper space with the direct sum of all other remaining eigenspaces: $(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})$. The bottom vector $\vec{v}$ becomes our primary target eigenspace matrix $E_{\lambda_1}$.
+
+We take our vector $\vec{b}$ residing between the spaces, and drop a line from its tip parallel to the upper subspace direct sum down onto $E_{\lambda_1}$ to completely isolate the component $\vec{v}_1$.
+
+\begin{center}
+\begin{tikzpicture}[scale=1.5]
+    \coordinate (O) at (0,0);
+    \coordinate (U) at (1.5,2.5);
+    \coordinate (V) at (4,0);
+    \coordinate (B) at (2.5,1.8);
+    
+    \draw[->, thick] (O) -- (U) node[above] {$(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})$};
+    \draw[->, thick] (O) -- (V) node[right] {Target Eigenspace $E_{\lambda_1}$};
+    \draw[->, ultra thick, blue] (O) -- (B) node[above right, black] {$\vec{b}$ (Vector from origin)};
+    
+    \draw[dashed, red, thick] (B) -- (1.42, 0);
+    \filldraw (1.42,0) circle (1.5pt) node[below] {$E_{\lambda_1}\hat{x}$ (Projection Point)};
+    \node[anchor=west] at (2.1,0.9) [red] {\small (This error segment $\vec{b} - E_{\lambda_1}\hat{x}$ is perfectly PARALLEL to the top space)};
+    \node[below left] at (O) {$0$};
+\end{tikzpicture}
+\end{center}
+
+Because the line from the tip of vector $\vec{b}$ to our projection point $E_{\lambda_1}\hat{x}$ runs completely parallel to the upper eigenspace direct sum $(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})$, any vector operating in the orthogonal complement space $\left(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}\right)^\perp$ will look at this path and annihilate it to zero:
+\[
+\left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T (\vec{b} - E_{\lambda_1} \hat{x}) = 0
+\]
+Distributing the transposed complement matrix yields:
+\[
+\left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T \vec{b} = \left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T E_{\lambda_1} \hat{x}
+\]
+Solving directly for the coordinate vector $\hat{x}$:
+\[
+\hat{x} = \left( \left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T E_{\lambda_1} \right)^{-1} \left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T \vec{b}
+\]
+Multiplying by our basis matrix $E_{\lambda_1}$ to return to standard coordinates yields the generalized oblique projector:
+\[
+P = E_{\lambda_1} \left( \left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T E_{\lambda_1} \right)^{-1} \left( (E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp \right)^T
+\]
+\section{The Proof of Left Nullspace Equivalence}
+
+To make this formula computationally usable, we show that calculating the perpendicular space $(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k})^\perp$ is equivalent to finding the \textbf{left null space} (the kernel of $A^T - \lambda_1 I$), which we denote as $LN_1$.
+
+\subsection*{Step 1: Orthogonality Proof}
+Let $\vec{x}$ be any vector in $\ker(A^T - \lambda_1 I)$. By definition, its forward transpose action is:
+\[
+A^T \vec{x} = \lambda_1 \vec{x} \implies \vec{x}^T A = \lambda_1 \vec{x}^T
+\]
+Now let $\vec{y}$ be any vector inside the eigenspace $E_{\lambda_2}$, meaning $A\vec{y} = \lambda_2 \vec{y}$. We want to prove that $\vec{x}$ and $\vec{y}$ are orthogonal ($\vec{x}^T \vec{y} = 0$). We left-multiply $\vec{y}$ to our transposed equation:
+\[
+\vec{x}^T A \vec{y} = \lambda_1 \vec{x}^T \vec{y}
+\]
+Substituting $A\vec{y} = \lambda_2 \vec{y}$ into the left side yields:
+\[
+\lambda_2 \vec{x}^T \vec{y} = \lambda_1 \vec{x}^T \vec{y} \implies (\lambda_2 - \lambda_1)\vec{x}^T \vec{y} = 0
+\]
+Because $\lambda_1$ and $\lambda_2$ are distinct eigenvalues, $(\lambda_2 - \lambda_1) \neq 0$. Therefore, it is structurally required that $\vec{x}^T \vec{y} = 0$. This same logic holds true for any vector chosen from $E_{\lambda_3}$ up to $E_{\lambda_k}$, proving that \textbf{every vector in $\ker(A^T - \lambda_1 I)$ is perpendicular to the direct sum $E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}$}.
+
+\subsection*{Step 2: Dimension Alignment}
+To prove these spaces are completely equivalent, we check their dimensions using the fundamental rank-nullity relationship ($\dim(\text{null}) + \dim(\text{row}) = n$):
+\begin{enumerate}
+    \item Let the total dimension of the other eigenspaces combined be $\sum_{j=2}^k m_j = n - m_1$, where $m_i$ represents the algebraic multiplicity of each eigenvalue.
+    \item The dimension of its perpendicular complement space is exactly:
+    \[
+    \dim\left(\left(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}\right)^\perp\right) = n - (n - m_1) = m_1
+    \]
+    \item Because the rank of a matrix equals the rank of its transpose ($\text{rank}(A - \lambda_1 I) = \text{rank}(A^T - \lambda_1 I)$), the nullity of both operators is identical. Thus, $\dim(\ker(A^T - \lambda_1 I)) = m_1$.
+\end{enumerate}
+Since $\ker(A^T - \lambda_1 I)$ is a subspace of $\left(E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k}\right)^\perp$ and they share the exact same dimension $m_1$, \textbf{they are the exact same vector space}. We explicitly denote this left null space basis matrix as $LN_1$.
+
+Substituting $LN_1^T$ back into our oblique projection formula completely cleans up the structure:
+\[
+P = E_{\lambda_1} \left(LN_1^T E_{\lambda_1}\right)^{-1} LN_1^T
+\]
+
+---
+
+\section{Matrix Deflation and Biorthogonalization via SVD Coordination}
+
+When we want to remove (deflate) the influence of an eigenvalue $\lambda_i$ from our system matrix $A$, we subtract its corresponding oblique projection operator weighted by its eigenvalue:
+\[
+A_{\text{deflated}} = A - \lambda_i E_{\lambda_i}(LN_i^T E_{\lambda_i})^{-1} LN_i^T
+\]
+Evaluating this expression directly is structurally heavy due to the presence of the inner matrix inverse matrix $(LN_i^T E_{\lambda_i})^{-1}$. To make our computation as simple as possible, we choose our refined right eigenspace basis \textbf{Q} and left nullspace basis \textbf{S} (both of size $n \times m_1$) such that they are perfectly normalized against each other:
+\[
+S^T Q = I_{m_1 \times m_1}
+\]
+When this condition is achieved, the original raw cross-talk matrix $LN_1^T E_1$ is completely eliminated from our calculations. The matrix inverse vanishes entirely, and the deflation formula drops down to a clean, direct matrix product sum:
+\[
+A_{\text{deflated}} = A - \lambda_i Q S^T
+\]
+
+\subsection{The Simplified SVD Construction}
+Instead of running a heavy iterative loop, we capture the cross-talk between the raw bases by multiplying them and taking their \textbf{Singular Value Decomposition (SVD)}:
+\[
+LN_1^T E_1 = U \Sigma V^T
+\]
+The SVD acts as a mathematical prism that splits the cross-talk into three clean components: $V^T$ and $U$ (the rotation components), and $\Sigma$ (the diagonal matrix containing the scaling values). 
+
+We can completely eliminate the cross-talk matrix and isolate our vector alignment adjustments into a single correction matrix $M = U\Sigma$. This allows us to define our synchronized channels in an ultra-simplified form:
+\[
+Q = E_1 V, \quad S = LN_1 M^{-1} \quad (\text{where } M = U\Sigma)
+\]
+By applying the inverse correction $M^{-1} = (U\Sigma)^{-1} = \Sigma^{-1}U^T$ directly to our left nullspace vectors, \textbf{S} absorbs the exact scaling inversion and turning motion needed to counteract the original misalignment. \textbf{Q} stays a clean, unscaled rotation of your original eigenspace vectors, completely bypassing fractional powers like $\Sigma^{-1/2}$.
+
+\subsection{The Deflation Logic: Eliminating $\lambda_1$}
+When this clean biorthogonal state is reached, applying $A$ to the vector component belonging to $E_{\lambda_1}$ can be written as a simple outer product operation:
+\[
+A \vert_{E_{\lambda_1}} = \lambda_1 Q S^T
+\]
+To completely wipe out (deflate) the forward influence of the eigenvalue $\lambda_1$ from our linear operator while leaving the remaining eigenvalues perfectly untouched, we subtract this isolated projection map directly from our matrix:
+\[
+A_{\text{deflated}} = A - \lambda_1 Q S^T
+\]
+
+---
+
+\section*{Alternate Method: Dual Gram-Schmidt}
+
+Instead of using a global SVD, we can construct $Q$ and $S$ vector by vector using the Dual Gram-Schmidt process. Let $E = (\vec{x}_1, \dots, \vec{x}_k)$ and $LN = (\vec{y}_1, \dots, \vec{y}_k)$. We build our synchronized tracking columns $Q$ and $S$ using a step-by-step loop:
+
+\begin{enumerate}
+    \item Initialize the first channel:
+    \[
+    \vec{q}_1 = \vec{x}_1, \quad \vec{s}_1 = \frac{\vec{y}_1}{\vec{y}_1^T \vec{q}_1}
+    \]
+    This structural choice guarantees that $\vec{s}_1^T \vec{q}_1 = 1$.
+    
+    \item For each subsequent channel $j$, find $\vec{q}_j$ by subtracting prior projections:
+    \[
+    \vec{q}_j = \vec{x}_j - \sum_{i=1}^{j-1} (\vec{s}_i^T \vec{x}_j)\vec{q}_i
+    \]
+    Compute the intermediate unscaled left vector $\vec{\tilde{s}}_j$ by subtracting cross-talk components:
+    \[
+    \vec{\tilde{s}}_j = \vec{y}_j - \sum_{i=1}^{j-1} (\vec{q}_i^T \vec{y}_j)\vec{s}_i
+    \]
+    To get the final coordinated left vector $\vec{s}_j$, normalize it against its partner:
+    \[
+    \vec{s}_j = \frac{\vec{\tilde{s}}_j}{\vec{\tilde{s}}_j^T \vec{q}_j}
+    \]
+\end{enumerate}
+
+This way, the heavy $(LN^T E)^{-1}$ matrix inversion is completely destroyed, leaving behind a straightforward outer product for deflation:
+\[
+A_{\text{deflated}} = A - \lambda Q S^T
+\]
+This proves that the block components $Q_i^T$ and $S_j$ are perfectly perpendicular, meaning the internal matrix components satisfy $S^T Q = I$.
+
+---
+
+\section{Global Biorthogonal Block Validation: Proving $Q^T S = I$}
+
+Once we have run our coordination processes for every individual block, we assemble the global right basis matrix $Q$ and global left basis matrix $S$ by stacking our individual block matrices side-by-side:
+\[
+Q = \begin{pmatrix} Q_1 & Q_2 & \dots & Q_k \end{pmatrix}, \quad S = \begin{pmatrix} S_1 & S_2 & \dots & S_k \end{pmatrix}
+\]
+
+When evaluating the global product $Q^T S$, we write $Q^T$ as a row block vector of transposed matrices and multiply it by the columns of $S$:
+\[
+Q^T S = \begin{pmatrix} Q_1^T \\ Q_2^T \\ \vdots \\ Q_k^T \end{pmatrix} \begin{pmatrix} S_1 & S_2 & \dots & S_k \end{pmatrix} = \begin{pmatrix} Q_1^T S_1 & Q_1^T S_2 & \dots & Q_1^T S_k \\ Q_2^T S_1 & Q_2^T S_2 & \dots & Q_2^T S_k \\ \vdots & \vdots & \ddots & \vdots \\ Q_k^T S_1 & Q_k^T S_2 & \dots & Q_k^T S_k \end{pmatrix}
+\]
+
+To prove that this full global matrix structure collapses into the identity matrix ($Q^T S = I_{n \times n}$), we examine two distinct geometric behaviors inside the block grid:
+
+\subsection*{Case 1: The Diagonal Blocks ($Q_i^T S_i = I$)}
+For any block lying directly on the main diagonal where $i = j$, our SVD or Dual Gram-Schmidt coordination algorithms explicitly engineered these specific basis vectors to eliminate internal cross-talk. Thus, by construction:
+\[
+Q_i^T S_i = I_{m_i \times m_i}
+\]
+
+\subsection*{Case 2: The Off-Diagonal Blocks ($Q_i^T S_j = \mathbf{0}$)}
+For any off-diagonal block where $i \neq j$, we must prove that $Q_i^T S_j = \mathbf{0}$. Recall that the columns of $Q_i$ are constructed strictly as a linear combination of the original raw eigenspace basis vectors belonging to $E_{\lambda_i}$:
+\[
+\text{colspan}(Q_i) = E_{\lambda_i}
+\]
+This means that the transposed row block $Q_i^T$ acts as an operator rooted in the perpendicular complement space of all other eigenspaces combined:
+\[
+Q_i^T \subset \left( E_{\lambda_1} \oplus \dots \oplus E_{\lambda_{i-1}} \oplus E_{\lambda_{i+1}} \oplus \dots \oplus E_{\lambda_k} \right)^\perp
+\]
+
+Now consider the column block $S_j$. The vectors making up $S_j$ are built out of the left nullspace vectors $LN_j$, which track the active components of the eigenvalue channel $\lambda_j$. Because $i \neq j$, the subspace where $S_j$ lives is explicitly part of that ``other eigenspaces'' collection that $Q_i^T$ is perpendicular to:
+\[
+\text{colspan}(S_j) \subset \left( E_{\lambda_1} \oplus \dots \oplus E_{\lambda_{i-1}} \oplus E_{\lambda_{i+1}} \oplus \dots \oplus E_{\lambda_k} \right)
+\]
+
+Because $Q_i^T$ is the perpendicular complement of the exact space housing $S_j$, taking their inner product completely annihilates every entry to zero:
+\[
+Q_i^T S_j = \mathbf{0}_{m_i \times m_j} \quad (\text{for } i \neq j)
+\]
+
+\subsection*{Conclusion of the Global Matrix Proof}
+Plugging both cases back into our giant block matrix multiplication grid, the off-diagonal cross blocks completely vanish into blocks of zeros, while the diagonal blocks yield clean identity sub-blocks:
+\(Q^{T}S=\left(\begin{matrix}I&\mathbf{0}&\dots &\mathbf{0}\\ \mathbf{0}&I&\dots &\mathbf{0}\\ \vdots &\vdots &\ddots &\vdots \\ \mathbf{0}&\mathbf{0}&\dots &I\end{matrix}\right)=I_{n\times n}\)
+This completes the ultimate global validation: the full stacked right transformation matrix $Q^T$ and left selection matrix $S$ are perfectly biorthogonal across the entire $\mathbb{R}^n$ space, ensuring that our spectral channels are totally isolated from one another.
+\end{document}
