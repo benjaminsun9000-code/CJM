@@ -1,27 +1,20 @@
-# Item 1 -- How to diagonalize A = S LamMatrix S^-1, find the S, use left-inverse,outer product, biorthonormal
+# How to diagonalize A = S LamMatrix S^-1, find the S, use left-inverse,outer product, biorthonormal
 
 # Use Power Method to find a lambda
-# check if A - lambda I has lower rank than (A-lambdaI)^2 : if it does, cant be eigendecomposed -- illustrate math why? how to find the algebraic multiplicity of lambda
+# check if A - lambda I has lower rank than (A-lambdaI)^2 : if it does, cant be eigendecomposed -- Extended eigen space is the same as eigen space means diagonalizable. See doc in this project for details 
 # Find the corresponding eigenvectors for lambda by finding the basis for null space of (A-lambda I), which is S
 # Compute Q^T which is the left inverse of S, which is (S^T S)^-1 S^T -- this is given partial S say n by k , find the biorthonormal matrix Q such that Q^T S = I k by k and S Q^T is a sum k outer product that A can be used to eliminate. This core idea is the same as SVD.
 # The core idea of SVD is that one can view any linear transormation as sum of outer product matrix. Each of the outer product do projection value, scale by diagnolized value, and change direction
-# Here for diagnalization of A using eigen vector, we follow similar patter to have A as S LamMatrix Q^T (think S ^-1 as Q^T). However, of each eigen value lambda, we have only partial S n by k matrix. Here k is the number of eigen vaectors (geo multiplicity) for this eigen value
-
-# Item 2 If AB=BA and both diagonalizable, then they share same eigenvector matrix S. Find S
-# Use Power Method to find a lambda
-# check if A - lambda I has lower rank than (A-lambdaI)^2: if it does, cant be eigendecomposed
-# Find the corresponding eigenvectors for lambda by finding the basis for null space of (A-lambdaI).
-# If the eigenvalues are not distinct, then we define B hat as B but restricted onto the null space of (A-lambda I), or the eigenspace of lambda. 
-# There is guranteed to be enough eigenvectors for us to fill, so we just find the eigenvectors of lambda.
-# If the eigenvalues are distinct, then we have found enough eigenvectors when we find the basis for null space of (A-lambdaI).
-
-# Prove Filippov's proof, when we get the M vectors, then they are linearly independent; use the chain vectors, extended vectors, null space completion vectors
 
 import numpy as np
+
 # input: matrix A
-# output: dominant eigen value, eigen vector and A tranpose eigen vector
-# Note 1: return error if can't find dominant eigen value
-# Note 2: improve nilpotent case -- TODO
+# output: dominant eigen value, eigen vector
+# Note 1: return None if can't find dominant eigen value
+#   This is the case that the dominant eigen value can be multiple and same magnitude. Conjugate pair of complex or lamb1 = - lamb2 
+# Note 2: return 0 if dominant egien value is 0. This must be [0] matrix. However, here we loop several time to eliminate the false case that the initial 
+#   vector is perpendicular to dominant eigen vector. 
+#   Also, for this reason, there is small chance the eigen value returned may not be the largest if the initial vector is perpendicular to dominant eigen vector.
 def power_dom_eigen(A, tol=1e-10, max_iter=1000000):
   A = np.asarray(A, dtype=float)
   N = A.shape[0]
@@ -141,9 +134,11 @@ def invert_via_rref(S):
             if i != j:
                 aug[j] -= aug[j, i] * aug[i]
     return aug[:, n:]
+
 # input: matrix A(diagonalizable)
 # output: eigenvector matrix S, eigenvalue matrix Lambda, S^-1(inverse of eigenvector matrix S)
-def diagonalized_matrix_parts(A,tol=1e-8):
+#         raise exception if not diagonalizable
+def diagonalized_matrix_parts(A,tol=2e-8):
     n = A.shape[0]
     A_current = A.astype(float)
     eigenvalues = []
@@ -173,7 +168,8 @@ def diagonalized_matrix_parts(A,tol=1e-8):
     return S, Lambda, S_inv
 A = np.array([[2, 1],
               [1, 2]])
-print(diagonalized_matrix_parts(A))
+S, Lambda, S_inv = diagonalized_matrix_parts(A)
+print(np.allclose(A, S @ Lambda @ S_inv))
 
 B = np.array([
     [2., 0., 0., 0., 0., 3.],
@@ -183,7 +179,8 @@ B = np.array([
     [0., 0., 0., 0., 5., 0.],
     [0., 0., 0., 0., 0., 5.]
 ])
-print(diagonalized_matrix_parts(B))
+S, Lambda, S_inv = diagonalized_matrix_parts(B)
+print(np.allclose(B, S @ Lambda @ S_inv ))
 
 # not diagonalizable
 C = np.array([
