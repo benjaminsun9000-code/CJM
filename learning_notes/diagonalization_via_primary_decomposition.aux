@@ -1,0 +1,93 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[margin=1in]{geometry}
+
+\begin{document}
+
+\section{Diagonalization via Primary Decomposition Theorem}
+
+\noindent When I learned Spectral Decomposition Theorem from Strang's Linear Algebra book, I realized there is an alternative route to reach this theorem from Primary Decomposition Theorem, instead of using the Schur Theorem route from Strang's book. The following summarized my discussion with GPT AI about this new route. The basic idea is simple, we can always use Gram-Schmidt method to get a basis for each eigen space. In the book, we already know that each eigen space is perpendicular to another eigen space. Thus, we only need to show every eigen space is the same as extended eigen space and thus, this linear transform is diagonalizable with eigen vector matrix as unity (or orthonormal).  
+
+\noindent\textbf{Theorem:} The Primary Decomposition Theorem states that the direct sum of extended eigenspaces is equal to $\mathbb{R}^n$:
+\[
+T_{\lambda_1} \oplus \dots \oplus T_{\lambda_k} = \mathbb{R}^n
+\]
+
+If a matrix $A$ is Hermitian ($A = A^H$), we want to prove the extended eigenspace $T_{\lambda_i} = E_{\lambda_i}$. To prove this, we must prove that $\text{null}(A - \lambda I) = \text{null}(A - \lambda I)^2$.
+
+If $(A - \lambda I)^2 \vec{x} = \vec{0}$, we want to prove $(A - \lambda I)\vec{x} = \vec{0}$.
+
+Recall that:
+\[
+\langle T\vec{x}, \vec{y} \rangle = \vec{x}^H T^H \vec{y}  = \langle \vec{x}, T^H \vec{y} \rangle
+\]
+
+If the dot product $\langle (A - \lambda I)\vec{x}, (A - \lambda I)\vec{x} \rangle = 0$, then $(A - \lambda I)\vec{x} = \vec{0}$.
+
+To prove that $(A - \lambda I)^H = A - \lambda I$ given that $A = A^H$ and $\lambda \in \mathbb{R}$ (since eigenvalues of a Hermitian matrix are real), we use the fundamental properties of the conjugate transpose:
+
+\begin{align*}
+(A - \lambda I)^H &= A^H - (\lambda I)^H &&\text{(by linearity of the conjugate transpose)} \\
+&= A^H - \bar{\lambda} I^H &&\text{(since $(\lambda B)^H = \bar{\lambda} B^H$ for a scalar $\lambda$)} \\
+&= A - \bar{\lambda} I &&\text{(since $A = A^H$ and $I^H = I$)} \\
+&= A - \lambda I &&\text{(since $A$ is Hermitian, $\lambda \in \mathbb{R} \implies \bar{\lambda} = \lambda$)}
+\end{align*}
+To prove that $(A - \lambda I)x = 0$, we expand the inner product using matrix conjugate transposes ($x^H$):
+
+\begin{align*}
+\langle (A - \lambda I)x, (A - \lambda I)x \rangle &= ((A - \lambda I)x)^H (A - \lambda I)x \\
+&= x^H (A - \lambda I)^H (A - \lambda I)x \\
+&= x^H (A - \lambda I)(A - \lambda I)x && \text{(since } (A - \lambda I)^H = A - \lambda I \text{)} \\
+&= x^H (A - \lambda I)^2 x \\
+&= \langle x, (A - \lambda I)^2 x \rangle
+\end{align*}
+
+Since $(A - \lambda I)^2 x = 0$, this yields:
+\[
+\langle (A - \lambda I)x, (A - \lambda I)x \rangle = \langle x, 0 \rangle = 0
+\]
+
+By the defintion of  inner product, $\langle v, v \rangle = 0 \implies v = 0$, which completes the proof that $(A - \lambda I)x = 0$.
+
+\vspace{1em}
+
+Generalizing this, if $A$ is normal ($A A^H = A^H A$), we would like to prove that if $(A - \lambda I)^2 \vec{x} = \vec{0}$, then $(A - \lambda I)\vec{x} = \vec{0}$.
+We call $B = A - \lambda I$:
+\[
+\langle B\vec{x}, B\vec{x} \rangle = (B\vec{x})^H (B\vec{x}) = \vec{x}^H B^H B \vec{x} = \vec{x}^H B B^H \vec{x} = \langle B^H\vec{x}, B^H\vec{x} \rangle
+\]i
+
+This shows that the length of $B\vec{x}$ is the same as the length of $B^H\vec{x}$. This means that the null space of $B$ and $B^H$ are the same:
+\[
+\text{If } B\vec{x} = \vec{0}, \quad \|B\vec{x}\| = \|B^H\vec{x}\| = 0 \implies B^H\vec{x} = \vec{0}
+\]
+
+Since $B$ null space and $B^H$ null space is the same:
+\[
+B(B\vec{x}) = \vec{0}
+\]
+$B\vec{x}$ is in $B$ null space, so it is also in $B^H$ null space:
+\[
+B^H(B\vec{x}) = \vec{0}
+\]
+\[
+\langle B\vec{x}, B\vec{x} \rangle = (B\vec{x})^H B\vec{x} = \vec{x}^H B^H B \vec{x} = \langle \vec{x}, B^H B \vec{x} \rangle = 0, \quad \text{so } B\vec{x} = \vec{0}
+\]
+
+We have proved that the extended eigenspace $T_{\lambda_i}$ is equal to $E_{\lambda_i}$. Therefore,
+\[
+E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k} = \mathbb{R}^n
+\]
+
+This way, we can use Gram--Schmidt to find an orthonormal basis for each $E_{\lambda_i}$.
+
+\vspace{1em}
+
+Then we combine them side-by-side to form our orthogonal matrix $U$. This is orthogonal because the eigenspaces are orthogonal. This way, we can diagonalize $A$:
+\[
+A = U \Lambda U^{-1}
+\]
+where $\Lambda$ is the diagonal matrix whose diagonals are the eigenvalues.
+
+\end{document}
