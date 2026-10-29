@@ -1,0 +1,169 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{geometry}
+\usepackage{tikz}
+
+\geometry{margin=1in}
+\newtheorem{theorem}{Theorem}
+
+\begin{document}
+
+\title{Understanding of Diagonalizability and No Repeated Roots in Minimal Polynomial Equivalent}
+\author{}
+\date{}
+\maketitle
+
+\section*{Problem Statement}
+For any matrix $A$, the following statements are equivalent:
+\begin{enumerate}
+    \item The matrix $A$ is diagonalizable.
+    \item The minimal polynomial of $A$ has no repeated roots, meaning each linear factor has a power of 1.
+\end{enumerate}
+
+\section{The Extended Eigenspace and Jordan Form View}
+When a matrix is non-defective, we can find a full set of $n$ eigenvector directions. This lets us split: 
+\[ \mathbb{R}^n = E_{\lambda_1} \oplus E_{\lambda_2} \oplus \dots \oplus E_{\lambda_k} \]
+where each $E_{\lambda_i} = \text{Ker}(A - \lambda_i I)$.
+
+However, defective matrices collapse---their eigenspaces are too small and only form a subspace of $\mathbb{R}^n$. To get the missing dimensions, we expand $E_{\lambda_i}$ into the extended eigenspace, denoted $T_{\lambda_i}$.
+
+Instead of stopping at $\text{Ker}(A-\lambda I)$, we look at vectors killed by higher powers of the operator:
+\begin{itemize}
+    \item Step 1: $\text{Ker}(A-\lambda I) \rightarrow$ the core eigenvectors
+    \item Step 2: $\text{Ker}(A-\lambda I)^2 \rightarrow$ vectors that need 2 applications to drop to $\vec{0}$
+    \item Step $m$: $\text{Ker}(A-\lambda I)^m \rightarrow$ the final boundary where the kernel stops growing
+\end{itemize}
+
+The kernel space of $(A-\lambda_i I)^k$ is called $T_{\lambda_i}$, aka the extended eigenspace. Every matrix has a Jordan Form---this basically means $T_{\lambda_i}$ has the same dimension as its algebraic multiplicity and thus all $T_{\lambda_i}$ decompose $\mathbb{R}^n$ just like $E_{\lambda_i}$:
+\[ T_{\lambda_1} \oplus \dots \oplus T_{\lambda_k} = \mathbb{R}^n \]
+
+\subsection*{Connecting the Onion Ring to Jordan Blocks and Chains}
+To see how the Jordan Canonical Form arises naturally, we must connect the "onion ring" structure of $T_{\lambda_i}$ with individual Jordan blocks:
+\begin{itemize}
+    \item \textbf{Extended Eigenspace ($T_{\lambda_i}$) = The Entire Onion Ring:} The full space $T_{\lambda_i}$ encompasses all nested kernel layers for eigenvalue $\lambda_i$. Its total dimension equals the algebraic multiplicity $m_i$.
+    \item \textbf{1 Core Eigenvector = 1 Jordan Block:} The number of independent eigenvectors in the innermost core $\text{Ker}(A - \lambda_i I)$ equals the geometric multiplicity $g_i$. Each independent eigenvector serves as the terminus for \textbf{one individual Jordan chain}, which in turn yields \textbf{one Jordan block}.
+    \item \textbf{1 Jordan Chain = 1 Path Inward:} Each chain originates in an outer layer $\text{Ker}(A-\lambda_i I)^k$ and steps radially inward toward an eigenvector in the core.
+\end{itemize}
+
+For a specific vector $\vec{x}_1 \in \text{Ker}(A-\lambda I)^3 \setminus \text{Ker}(A-\lambda I)^2$, repeatedly applying $(A-\lambda I)$ generates a chain of length 3 that terminates at an eigenvector in $\text{Ker}(A-\lambda I)$:
+\[ \vec{x}_1 \xrightarrow{A-\lambda I} \vec{x}_2 \xrightarrow{A-\lambda I} \vec{x}_3 \xrightarrow{A-\lambda I} \mathbf{0} \]
+
+In our example, $T_{\lambda_i}$ consists of three such chains:
+\begin{align*}
+    \vec{x}_1 &\rightarrow \vec{x}_2 \rightarrow \vec{x}_3 \\
+    \vec{y}_1 &\rightarrow \vec{y}_2 \\
+    \vec{z}_1 &
+\end{align*}
+Here, $T_{\lambda_i}$ has dimension 6, algebraic multiplicity 6, and geometric multiplicity 3 (corresponding to the 3 distinct chains and 3 Jordan blocks).
+
+\begin{center}
+\begin{tikzpicture}[scale=0.8]
+    \draw[dashed] (0,0) circle (1cm);
+    \draw[dashed] (0,0) circle (2cm);
+    \draw (0,0) circle (3cm);
+    \node at (0,0) {$\text{Ker}(A-\lambda I)$};
+    \node at (0,1.4) {$\text{Ker}(A-\lambda I)^2$};
+    \node at (0,2.5) {$\text{Ker}(A-\lambda I)^m$};
+    \filldraw (2.2,1.2) circle (2pt) node[right] {$\vec{x}_1$};
+    \draw[->,thick] (2.2,1.2) .. controls (1.5,1.2) .. (1.2,0.6) node[below] {$\vec{x}_2$};
+    \draw[->,thick] (1.2,0.6) -- (0.4,0.2) node[below] {$\vec{x}_3$};
+\end{tikzpicture}
+\end{center}
+
+\subsection*{How Jordan Blocks Emerge from Basis Chains}
+Let $(\vec{m}_1, \vec{m}_2, \vec{m}_3)$ be a Jordan chain written in reverse order (where $\vec{m}_1$ is the core eigenvector in $\text{Ker}(A-\lambda I)$):
+\[ (A - \lambda I)\vec{m}_1 = \mathbf{0} \implies A\vec{m}_1 = \lambda \vec{m}_1 \]
+\[ (A - \lambda I)\vec{m}_2 = \vec{m}_1 \implies A\vec{m}_2 = \vec{m}_1 + \lambda \vec{m}_2 \]
+\[ (A - \lambda I)\vec{m}_3 = \vec{m}_2 \implies A\vec{m}_3 = \vec{m}_2 + \lambda \vec{m}_3 \]
+
+Writing this system in matrix block form gives:
+\[ A \begin{pmatrix} \vec{m}_1 & \vec{m}_2 & \vec{m}_3 \end{pmatrix} = \begin{pmatrix} \vec{m}_1 & \vec{m}_2 & \vec{m}_3 \end{pmatrix} \begin{pmatrix} \lambda & 1 & 0 \\ 0 & \lambda & 1 \\ 0 & 0 & \lambda \end{pmatrix} \]
+
+This explicitly demonstrates why Jordan blocks have $\lambda$ on the main diagonal and $1$s on the superdiagonal: the $1$s encode the step-by-step shift inward across the layers of the onion ring!
+
+Thus, $A = M J M^{-1}$, where $J$ is composed of block matrices on the diagonal corresponding to each chain in $T_{\lambda_i}$:
+\[ J = \begin{pmatrix} J_{\lambda_1} & & \\ & \ddots & \\ & & J_{\lambda_k} \end{pmatrix} \quad \text{where} \quad J_{\lambda_i} = \begin{pmatrix} J_{1} & & \\ & \ddots & \\ & & J_{g_i} \end{pmatrix} \]
+
+Moreover, the dim of $T_{\lambda_i}$ is exactly the dim of $J_{\lambda_i}$, which is also the power of corresponding $\lambda_i$ terms in characteristic functionof the linear transform. This is not yet proved here but is the directed result of the Primary Decomposition Theroem. 
+  
+Thus, this Primary Decomposition Theorem unifies eigenspaces and Jordan forms: Jordan Form is simply the matrix representation of $A$ under the extended eigenspace chain basis. If $A$ is diagonalizable, $T_{\lambda_i}$ never expands past the first ring, so $T_{\lambda_i} = E_{\lambda_i}$ for all $i$.
+
+Specifically for the $J$ matrix of the linear transform in Jordan form, we can think of $J$ consists first a layer of $J_{\lambda_i}$ block (sub matrix) on its diagonal. Each of this $J_{\lambda_i}$ denotes the extended eigen space $T_{\lambda_i}$. For each $J_{lambda_i}$, it consists another layer of $J_i$ on its diagonal. Each $J_i$ denotes one chain in the onion rings of $T_{\lambda_i}$. The total number of chains is just the count of geometrical multiplicity of the eigen space (or extended eigen space) of this $\lambda_i$. This is easy to understand as each chains ends up in the most internal circle, which is just the eigen space of this $\lambda_i$, including length one chains just reside in the eigen space. Here, the internal structure of $J_i$ is not just $\lambda_i$ in the diagonal. It has also one more line of 1s in the diagonal shifted upper right one move to compensate for the chain structure as illustrated above. All in all, from the structure wise, we can see that $J$ is made with as blocks as diagonalizable as possible. $J$ contains the inner most blocks as $J_i$ block. This diagonal structure has the beauty that why they multiple each other, the resulting matrix can be viewed as diagonal blocks multiplication. This would drastically make later Cayley Theorem easily to understand. 
+
+\section{The Characteristic Polynomial View}
+To get the eigenvalues of a matrix, we search for values that satisfy $Ax = \lambda x$. This requirement is equivalent to finding $(A-\lambda I)x = \mathbf{0}$ for non-zero $x$, which corresponds to $\det(A-\lambda I)=0$. This yields the characteristic polynomial:
+\[ P_A(\lambda) = \det(A-\lambda I) = 0 \]
+
+By the Fundamental Theorem of Algebra, $P_A(\lambda)$ factors into linear terms:
+\[ P_A(\lambda) = (\lambda - \lambda_1)^{m_1}(\lambda - \lambda_2)^{m_2}\dots(\lambda - \lambda_k)^{m_k} \]
+where $m_i$ is the algebraic multiplicity of $\lambda_i$, matching $\text{dim}(T_{\lambda_i})$.
+
+\section{Why Jordan Form Wipes Out the Characteristic Polynomial}
+
+\subsection{The Matrix Multiplication View: Step-by-Step Block Elimination}
+Cayley Theorem status linear transform's matrix wipes out its characteristic polynomial. To see how a matrix annihilates its characteristic polynomial ($P_A(A) = \mathbf{0}$), we look at matrix multiplication on $J$. Consider a $7 \times 7$ matrix $A$ with characteristic polynomial $P_A(x) = (x - \lambda_1)^5 (x - \lambda_2)^2$.
+
+The $5$-dim space for $\lambda_1$ contains two blocks: one $3 \times 3$ block and one $2 \times 2$ block. The $2$-dim space for $\lambda_2$ contains one $2 \times 2$ block. The matrix $J$ is arranged as:
+\[ J = \left( \begin{array}{ccc|cc|cc} 
+\lambda_1 & 1 & 0 & 0 & 0 & 0 & 0 \\ 
+0 & \lambda_1 & 1 & 0 & 0 & 0 & 0 \\ 
+0 & 0 & \lambda_1 & 0 & 0 & 0 & 0 \\ \hline 
+0 & 0 & 0 & \lambda_1 & 1 & 0 & 0 \\ 
+0 & 0 & 0 & 0 & \lambda_1 & 0 & 0 \\ \hline 
+0 & 0 & 0 & 0 & 0 & \lambda_2 & 1 \\ 
+0 & 0 & 0 & 0 & 0 & 0 & \lambda_2 
+\end{array} \right) \]
+
+When evaluating factors step by step, each power shifts superdiagonal $1$s upward, zeroing out blocks based on their size:
+\begin{enumerate}
+    \item \textbf{Eliminating the $3 \times 3$ block of $\lambda_1$ via $(J - \lambda_1 I)^3$:}
+    Subtracting $\lambda_1 I$ zeroes out the main diagonal of the $\lambda_1$ blocks. Raising $(J - \lambda_1 I)$ to power 3 shifts the superdiagonal $1$s completely off the $3 \times 3$ block, wiping it out to $\mathbf{0}$.
+    
+    \item \textbf{Eliminating the $2 \times 2$ block of $\lambda_1$ via $(J - \lambda_1 I)^2$:}
+    Raising $(J - \lambda_1 I)$ to power 2 is already enough to shift the $1$s off the smaller $2 \times 2$ block of $\lambda_1$, zeroing it out completely.
+
+    \item \textbf{Matching extended eigen space dim with algebraic multiplicity}
+    Here is the important thing. In the characteristic polynomial, the root $\lambda_1$ has exactly 5 (algebraic multiplicity) multiplicity as the above sections illustrated. This is also the dim of the extended eigen space. Thus, the number of $(J-\lambda_1 I)$ of 3 and 2 aligns with algebraic multiplicity even the geometrically multiplicity is 2. This alignment basically says the first three in item 1 eliminates the first chains in this extended eigen space. The second two in item 2 eliminates the second chains in this extended eigen space. Later this 3 by 3 0 block will make corresponding block in the end result matrix 0 block, for the reason that diagonal block matrix multiplication can be viewed as corresponding block on the diagonal multiplication.  Same thing can be said for the 2 by 2 block.  
+    
+    \item \textbf{Eliminating the $2 \times 2$ block of $\lambda_2$ via $(J - \lambda_2 I)^2$:}
+    Similarly, applying $(J - \lambda_2 I)^2$ zeroes out the main diagonal of the $\lambda_2$ block and shifts its superdiagonal $1$s off at power 2, wiping out the entire $2 \times 2$ block of $\lambda_2$.
+\end{enumerate}
+
+\subsection*{The Realization: Only the Longest Chain Matters}
+Notice what happens in the factor $(J - \lambda_1 I)^5$:
+\begin{itemize}
+    \item Power 1 leaves superdiagonal 1s.
+    \item Power 2 eliminates the smaller $2 \times 2$ block of $\lambda_1$.
+    \item Power 3 eliminates the larger $3 \times 3$ block of $\lambda_1$.
+\end{itemize}
+
+Once the power reaches **3** (the length of the longest chain / largest block for $\lambda_1$), **all** blocks belonging to $\lambda_1$ are completely zeroed out! The extra powers up to 5 in $(J - \lambda_1 I)^5$ are entirely redundant.
+
+This key realization reveals that to achieve annihilation, we do not need the full algebraic multiplicity $m_i$; we only need a power equal to the size of the *longest Jordan chain* (largest block size) for each eigenvalue!
+
+\section{Refining Cayley-Hamilton: The Emergence of the Minimal Polynomial}
+\begin{itemize}
+    \item \textbf{Geometric Multiplicity ($g_i$):} $\text{dim}(\text{Ker}(A - \lambda_i I))$, representing the total number of independent Jordan blocks for $\lambda_i$.
+    \item \textbf{Algebraic Multiplicity ($m_i$):} $\text{dim}(T_{\lambda_i})$, the sum of sizes of all Jordan blocks for $\lambda_i$.
+    \item Geometric and algebraic multiplicities obey $g_i \le m_i$.
+\end{itemize}
+
+The **minimal polynomial $M_A(x)$** is defined as the unique monic polynomial of lowest degree that annihilates $A$, meaning $M_A(A) = M_A(J) = \mathbf{0}$. Instead of taking the total algebraic multiplicities $m_i$, it looks strictly at the maximum chain lengths.
+
+For our $7 \times 7$ example, because power 3 eliminates all $\lambda_1$ blocks and power 2 eliminates all $\lambda_2$ blocks, $M_A(x)$ drops the redundant powers to achieve annihilation with a degree-5 polynomial instead of degree-7:
+\[ M_A(x) = (x-\lambda_1)^3 (x-\lambda_2)^2 \]
+
+\section{Minimal Erase: The Natural Sequence to Diagonalizability}
+
+\subsection*{The Elegant Equivalence}
+The complete connection flows naturally:
+\begin{itemize}
+    \item \textbf{Direction 1 ($\implies$):} If $A$ is **diagonalizable**, $g_i = m_i$ for all $i$. Every Jordan block must be a $1 \times 1$ scalar block. The maximum chain length for every eigenvalue is 1, so the minimal polynomial has **no repeated roots**:
+    \[ M_A(x) = (x-\lambda_1)^1 (x-\lambda_2)^1 \dots (x-\lambda_k)^1 \]
+    
+    \item \textbf{Direction 2 ($\impliedby$):} If $M_A(x)$ has **all powers equal to 1**, the maximum chain length is 1. Thus, no Jordan block can be $2 \times 2$ or larger. Every block is a $1 \times 1$ matrix, forcing $g_i = m_i$ for all eigenvalues and proving $A$ **is diagonalizable**. \qed
+\end{itemize}
+
+\end{document}
