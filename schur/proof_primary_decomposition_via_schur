@@ -1,0 +1,196 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[a4paper, margin=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+
+\title{\textbf{From Schur Triangularization to Primary Decomposition Theorem}}
+\author{Handwritten Notes Conversion}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Introduction}
+When I learned Schur Triangularization from Gilbert Strang's \emph{``Linear Algebra and Its Applications''}, I wanted to see if this route leads to the Primary Decomposition Theorem. To prove the Primary Decomposition Theorem, we need to prove two things:
+
+\begin{enumerate}
+    \item \textbf{Step 1:} Prove $\dim(T_{\lambda_i}) = \text{algebraic multiplicity of } \lambda_i$, where $T_{\lambda_i}$ is the generalized eigenspace (extended eigenspace) of $\lambda_i$.
+    \item \textbf{Step 2:} Prove $T_{\lambda_i}$ form a direct sum.
+\end{enumerate}
+
+\section{Setup and Basis Notation}
+
+In our previous proof, we showed that the algebraic multiplicity is the number of times $\lambda_i$ appears on $T$'s diagonal, where $A = U T U^{\dagger}$.
+
+We view $A = U T U^{\dagger}$ as a basis transformation. Then, $T$ lives in the $\{\vec{f}_i\}$ basis, whose $\vec{f}_i$ basis as abstract vectors has coordinates in $U$ where $\vec{f}_i$ has coordinates in the standard $\{\vec{e}_i\}$ basis.
+
+All the following discussion is in the $\{\vec{f}_i\}$ basis for $T$. Put another way to prove:
+\[
+\dim(T_{\lambda_i}) = \text{number of } \lambda_i \text{ appearances in } T
+\]
+it does not really depend on the choice of basis. Specifically, we can use the $\{\vec{f}_i\}$ basis instead of $\{\vec{e}_i\}$. Then we need to prove two things:
+
+\begin{enumerate}
+    \item $\vec{f}_1, \dots, \vec{f}_k$ belong to $T_{\lambda_1}$ (which we can show by $(T - \lambda_1 I)^k \vec{f}_i = \vec{0}$).
+    \item Any linear combination of $\vec{f}_{k+1}, \dots, \vec{f}_n$ is not in $T_{\lambda_1}$.
+\end{enumerate}
+
+\section{Step 1: Generalized Eigenspace Dimension}
+
+To prove (1), let us look at $(T - \lambda I)^m$. Since $T$ is upper triangular, we can write it as a block matrix:
+\[
+T - \lambda I = \begin{bmatrix} A & B \\ \mathbf{0} & C \end{bmatrix}
+\]
+where $A$ is an upper triangular matrix of size $k \times k$ with diagonal elements equal to $0$ (since $\lambda$ is subtracted from itself), $B$ is a $k \times (n-k)$ block, and $C$ is an upper triangular matrix of size $(n-k) \times (n-k)$ containing the remaining eigenvalues along its diagonal:
+\[
+C = \begin{bmatrix} \lambda_2 - \lambda_1 & & * \\ & \ddots & \\ 0 & & \lambda_r - \lambda_1 \end{bmatrix}
+\]
+
+$\lambda_1h$ has an algebraic multiplicity of $k$. In my previous proof, we have proved that all of A's eigenvalues lay on T's diagonal in Schur Decomposition. The basic idea is that since similar matrices have same eigenvalues, and $A$ and $U T U^-1$ are similar matrices. Then we use Fundamental Theorem of Algebra to prove that the algebraic multiplicty of $\lambda_1$ is how many times it appears on $T$'s diagonal. The eigenvalues are also distinct. Therefore, every diagonal term in $C$ is guaranteed to be non-zero.
+
+When we raise this block upper triangular matrix to any integer power $p$:
+\[
+(T - \lambda_1 I)^p = \begin{bmatrix} A^p & D \\ \mathbf{0} & C^p \end{bmatrix}
+\]
+$D$ is a matrix we don't know. Because the diagonal of $A$ is $0$, raising it to the $p$-th power shifts non-zero entries up and to the right p times:
+\[
+A^p = \mathbf{0} \quad \text{for } p \ge k
+\]
+Multiplying an upper triangular matrix by itself raises its diagonal entries to that power. For any $p$, the diagonal of $C^p$ is:
+\[
+\text{diag}(C^p) = \begin{bmatrix} (\lambda_2 - \lambda_1)^p, & (\lambda_3 - \lambda_1)^p, & \dots, & (\lambda_n - \lambda_1)^p \end{bmatrix}
+\]
+This means that every diagonal entry of $C^p$ is non-zero.
+
+Using the basic idea of a linear transform, the result of $\vec{f}_1$'s image is the first column of $(T-\lambda I)^k$. The first column of $(T - \lambda I)^k$ is $A^k$ and then 0, and $A^k = \mathbf{0}$. This is because $A$'s diagonals are 0, so when we apply it $k$ times, the rest of the elements shift off the matrix, thus $A^k = \mathbf{0}$. This shows the first k columns of $(T - \lambda I)^k$ are 0.
+
+$\vec{f}_k$'s image's result is the $k$-th column, which is $\vec{0}$ since $A^k = \mathbf{0}$. This shows that:
+\[
+(T - \lambda I)^m \vec{f}_k = \vec{0}
+\]
+
+To prove requirement (2), think of $S$ as the subspace spanned by the first $k$ vectors $\{\vec{f}_1, \dots, \vec{f}_k\}$. We need the linear combination to be non-zero for any power of $(T - \lambda I)$. Subspace $S_2$ is spanned by the remaining vectors $\{\vec{f}_{k+1}, \dots, \vec{f}_n\}$. Let $\vec{v} \in S_2$ be an arbitrary non-zero vector. We can write $\vec{v}$ as a linear combination of only the $S_2$ basis vectors:
+\[
+\vec{v} = c_{k+1} \vec{f}_{k+1} + c_{k+2} \vec{f}_{k+2} + \dots + c_n \vec{f}_n
+\]
+Since $\vec{v} \neq \vec{0}$, there must be a non-zero coefficient $c_n \neq 0$.
+
+Because $C^p$ is upper triangular, its last row contains all $0$'s followed by its final entry, which is $(\lambda_n - \lambda_1)^p$. Because $C^p$ is upper triangular, each term in the linear combination corresponds to a column multiplying its respective coefficient. Due to the upper-triangular structure, the entries below the diagonal in each column are zero, meaning that when we evaluate the final component of the product, only the last term survives while the preceding terms have zero entries in that final position. Evaluating the product yields the coefficent of $\vec{f}_n$:
+\[
+c_n (\lambda_n - \lambda_1)^p
+\]
+Since $c_n \neq 0$ and $\lambda_n \neq \lambda_1$, this term is non-zero:
+\[
+c_n (\lambda_n - \lambda_1)^p \neq 0
+\]
+
+Therefore, $(T - \lambda_1 I)^p \vec{v} \neq \vec{0}$. This proves that no non-zero vector from $S_2$ can be annihilated by $(T - \lambda_1 I)^p$ to become $\vec{0}$. Thus, $\vec{v}$ can never satisfy the requirement to be in $T_{\lambda_1}$, proving that any linear combination from $S_2$ is locked out of $T_{\lambda_1}$.
+
+Another way to view this is that $C^p$ is invertible. It is invertible since its determinant is 0. An invertible times a non-zero vector from S2 is still a non-zero vector. This way, when $C^p$ multiplies the vector, the result is non-zero, showing that the linear combination is never 0.
+Hence:
+\[
+\dim(T_{\lambda_i}) = \text{algebraic multiplicity of } \lambda_i
+\]
+
+\section{Step 2: Direct Sum of Generalized Eigenspaces}
+
+To prove that the generalized eigenspaces $T_{\lambda_i}$ form a direct sum, we must show that if we take one vector from each space and add them together to get the zero vector, then each individual vector must be exactly zero.
+
+Assume $T$ has three distinct eigenvalues $\lambda_1, \lambda_2, \lambda_3$:
+\[
+T = \begin{bmatrix} 
+\lambda_1 & * & & & & & \\ 
+& \lambda_1 & & & & & \\ 
+& & \lambda_2 & * & * & & \\ 
+& & & \lambda_2 & * & & \\ 
+& & & & \lambda_2 & & \\ 
+& & & & & \lambda_3 & * \\ 
+& & & & & & \lambda_3 
+\end{bmatrix}
+\]
+The basis vectors are partitioned as:
+\[
+\underbrace{\vec{f}_1, \vec{f}_2}_{\lambda_1}, \quad \underbrace{\vec{f}_3, \vec{f}_4, \vec{f}_5}_{\lambda_2}, \quad \underbrace{\vec{f}_6, \vec{f}_7}_{\lambda_3}
+\]
+
+First, we write out our sum equation:
+\[
+\vec{v}_1 + \vec{v}_2 + \vec{v}_3 = \vec{0}
+\]
+where each vector belongs to its respective extended eigenspace:
+\begin{itemize}
+    \item $\vec{v}_1 \in T_{\lambda_1}$ (spanned by basis $\vec{f}_1, \vec{f}_2$)
+    \item $\vec{v}_2 \in T_{\lambda_2}$ (spanned by basis $\vec{f}_3, \vec{f}_4, \vec{f}_5$)
+    \item $\vec{v}_3 \in T_{\lambda_3}$ (spanned by basis $\vec{f}_6, \vec{f}_7$)
+\end{itemize}
+When we write our sum equation:
+\[
+\vec{v}_1 + \vec{v}_2 + \vec{v}_3 = \vec{0}
+\]
+and apply $(T - \lambda_1 I)^2$:
+\[
+(T - \lambda_1 I)^2 (\vec{v}_1 + \vec{v}_2 + \vec{v}_3) = \vec{0}
+\]
+Since $(T - \lambda_1 I)^2 \vec{v}_1 = \vec{0}$, this simplifies to:
+\[
+\mathbf{0} + (T - \lambda_1 I)^2 \vec{v}_2 + (T - \lambda_1 I)^2 \vec{v}_3 = \vec{0}
+\]
+
+Since $\vec{v}_2$ and $\vec{v}_3$ can be written as linear combinations of their respective basis vectors:
+\begin{align*}
+\vec{v}_2 &= c_3 \vec{f}_3 + c_4 \vec{f}_4 + c_5 \vec{f}_5 \\
+\vec{v}_3 &= c_6 \vec{f}_6 + c_7 \vec{f}_7
+\end{align*}
+When we apply $(T - \lambda_1 I)^2$, the image of $c_3 \vec{f}_3$ is $c_3 (T - \lambda_1 I)^2 \vec{f}_3$. Similarly, the image of $c_6 \vec{f}_6$ is $c_6 (T - \lambda_1 I)^2 \vec{f}_6$.
+
+Let's write out the matrix $(T - \lambda_1 I)^2$:
+\[
+(T - \lambda_1 I)^2 = \begin{bmatrix}
+0 & 0 & b_{13} & b_{14} & b_{15} & b_{16} & b_{17} \\
+0 & 0 & b_{23} & b_{24} & b_{25} & b_{26} & b_{27} \\
+0 & 0 & (\lambda_2 - \lambda_1)^2 & b_{34} & b_{35} & b_{36} & b_{37} \\
+0 & 0 & 0 & (\lambda_2 - \lambda_1)^2 & b_{45} & b_{46} & b_{47} \\
+0 & 0 & 0 & 0 & (\lambda_2 - \lambda_1)^2 & b_{56} & b_{57} \\
+0 & 0 & 0 & 0 & 0 & (\lambda_3 - \lambda_1)^2 & b_{67} \\
+0 & 0 & 0 & 0 & 0 & 0 & (\lambda_3 - \lambda_1)^2
+\end{bmatrix}
+\]
+
+The image of $\vec{v}$ ($\vec{v}_1, \vec{v}_2, \vec{v}_3$) is also linear combination of {$\vec{f}$} basis. Every term's image can potentially contribute to $\vec{f}_7$. Put it another way, each image of the terms ($c_3 \vec{f}_3$, $c_4 \vec{f}_4$, \dots, $c_7 \vec{f}_7$) can contributes to $\vec{f}_7$'s coefficient. Only $c_7 \vec{f}_7$'s image contributes because $(T - \lambda I)^2$ is upper triangular, and it's coefficient is just $c_7 (\lambda_3 - \lambda_1)^2$. 
+\[
+c_7 (\lambda_3 - \lambda_1)^2 = 0
+\]
+Since $\lambda_3 \neq \lambda_1$, this forces $c_7 = 0$. 
+
+Then for $\vec{f}_6$ only $c_6 \vec{f}_6, c_7 \vec{f}_7$'s image contributes to its coefficient because $(T - \lambda I)^2$ is upper triangular. But because $c_7$ = 0, only $c_6 \vec{f}_6$ contributes,  leaving:
+\[
+c_6 (\lambda_3 - \lambda_1)^2 = 0 \implies c_6 = 0
+\]
+Continuing this cascade upward through the rows, we derive that $c_5 = 0, c_4 = 0, c_3 = 0$.
+
+This simplifies our linear combination equation to:
+\[
+c_1 \vec{f}_1 + c_2 \vec{f}_2 = \vec{0}
+\]
+Since $\vec{f}_1$ and $\vec{f}_2$ are linearly independent, this implies $c_1 = 0$ and $c_2 = 0$. 
+
+Therefore, $\vec{v}_1 = \vec{0}$, $\vec{v}_2 = \vec{0}$, and $\vec{v}_3 = \vec{0}$, completing the proof that the generalized eigenspaces form a direct sum!
+
+
+\section*{Wrong proof of direct sum}
+After writing it out and I realized this Extended Eigen Space forming direct sum proof is wrong. The thing is not that the logic of establishing the $\vec{v1}$, $\vec{v2}$ and $\vec{v3}$ as 0 if there sum is 0 wrong. The thing is that $\vec{f3}$, $\vec{f4}$ and $\vec{f5}$ are not basis of extended eigen space of $\lambda_2$. In fact an extended eigen space is an invariant subspace under linear transform $A$ or $T$ which is $A$ in ${\vec{f}}$ basis. If$\vec{f3}$, $\vec{f4}$, $\vec{f5}$ are basis for this extended eigen space of $\lambda_2$, the image of these basis as a vector can be expressed as a linear combination of $\vec{f3}$, $\vec{f3}$ and $\vec{f5}$. Thus, $\vec{f3}$ corresponding column 3 in $T$ should have non zero value only in position 3, 4, 5. Or put it another way, the $T$ should be diagonally block wise matrix. 
+
+We will provide another proof next.
+
+
+\end{document}
