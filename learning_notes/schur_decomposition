@@ -163,4 +163,7 @@ To prove that $A$'s eigenvalues are $T$'s eigenvalues:
 
 Because $A$'s eigenvalues are equivalent to $T$'s eigenvalues, and $T$'s eigenvalues lie on its diagonal, $A$'s eigenvalues can be read directly off $T$'s diagonal.
 
+\section*{Further improvement of Schur}
+In the first step, we put one eigen vector and get the first column in T as lambda and all rest as 0. In fact, this has geometrically meanings that we want to explore with quotient space, as in the book LADR. Here, for this proof, we can actually calculate the whole eigen vectors for this lambda, say k of them. And we can put this k vectors as the first k in U, then we can get the first k columns in T having k by k matrix as $\lambda I$ and rest as 0 matrix. This prove will still work. Morevoer, for defective matrix, we can still find  $\lambda$ still as eigen value of $A_1$. But this still would work.    
+
 \end{document}
